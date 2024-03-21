@@ -11,11 +11,12 @@ var coinPath = "images/coin.png";
 
 let bgSprite;
 let marioSprite;
-let marioSpeed = 5; // Speed of Mario's movement
-let jumpForce = 10; // Force of Mario's jump
-let gravity = 0.5; // Gravity effect
-let jumping = false; // Flag to indicate whether Mario is jumping
-let keys = {}; // Object to store the state of keys
+let marioSpeed = 5;
+let jumpForce = 10; 
+let gravity = 0.5; 
+let bombSpeed=5;
+let jumping = false; 
+let keys = {}; 
 
 function bg(bgPath) {
     bgSprite = PIXI.Sprite.from(bgPath);
@@ -37,7 +38,7 @@ function bomb(bombPath) {
     bombSprite = PIXI.Sprite.from(bombPath);
     bombSprite.scale.set(0.2);
     bombSprite.anchor.set(0.5);
-    bombSprite.x = app.renderer.width / 2 + 200;
+    bombSprite.x = app.renderer.width / 2 + 2000;
     bombSprite.y = app.renderer.height / 2 + 150;
     app.stage.addChild(bombSprite);
 }
@@ -55,7 +56,12 @@ function mario(marioPath) {
     document.addEventListener("keyup", onKeyUp);
 }
 
-// Event listener for keydown event
+bg(bgPath);
+mario(marioPath);
+coin(coinPath);
+bomb(bombPath);
+
+//keydown logic
 function onKeyDown(event) {
     if (event.key === " ") {
         if (!jumping) {
@@ -65,7 +71,7 @@ function onKeyDown(event) {
     keys[event.key] = true;
 }
 
-// Event listener for keyup event
+//keup logic
 function onKeyUp(event) {
     keys[event.key] = false;
 }
@@ -79,7 +85,7 @@ function update() {
         marioSprite.x += marioSpeed;
     }
     
-    // Jumping behavior
+
     if (jumping) {
         marioSprite.y -= jumpForce;
         jumpForce -= gravity;
@@ -96,7 +102,74 @@ app.ticker.add(() => {
     update();
 });
 
-bg(bgPath);
-mario(marioPath);
-coin(coinPath);
-bomb(bombPath);
+
+const bombSprites = [];
+const totalBombs = 3;
+
+function createBomb() {
+  const texture = PIXI.Texture.from("images/bomb.png");
+  const bombSprite = new PIXI.Sprite(texture);
+  bombSprite.scale.set(0.2);
+  app.stage.addChild(bombSprite);  
+
+  // Set initial position of bomb
+  bombSprite.x = app.renderer.width / 2 + 2000;
+  bombSprite.y = app.renderer.height/2 + 110 ; // Start from above the screen
+
+  // Add bombSprite to the array
+  bombSprites.push(bombSprite);
+
+  //delay between the bombs
+  bombSprite.delay = Math.random() * 2000;
+  bombSprite.elapsedTime = 0;
+}
+
+// Create bombs
+for (let i = 0; i < totalBombs; i++) {
+  createBomb();
+}
+
+app.ticker.add((delta) => {
+
+    bombSprites.forEach((bombSprite) => {
+        bombSprite.elapsedTime += delta;
+
+        if (bombSprite.elapsedTime >= bombSprite.delay) {
+            bombSprite.x -= (bombSpeed * delta) / 1; 
+            
+            // Border logic
+            if (bombSprite.x < -100) {
+                setTimeout(() => {
+                    bombSprite.x = app.renderer.width+100;
+                }
+                ,Math.random() * 1000); 
+               
+            }
+        }
+    });
+
+});
+
+
+
+//add ticker to move bomb
+function bombMove(bombSpeed) {
+   app.ticker.add(() => {
+    bombSprite.x -= bombSpeed;
+    if (bombSprite.x < -100) {
+        bombSprite.x = app.renderer.width;
+    }
+});
+}
+bombMove(bombSpeed);
+
+
+
+
+
+ 
+
+
+
+
+
