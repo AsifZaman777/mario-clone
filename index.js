@@ -50,7 +50,7 @@ function coin(coinPath) {
     else{
     coinSprite.scale.set(0.3);
     coinSprite.anchor.set(0.5);
-    coinSprite.x = app.renderer.width / 2 + 2000;
+    coinSprite.x = app.renderer.width / 2 + Math.floor(Math.random() * 2000) + 1500 ;
     coinSprite.y = app.renderer.height / 2 - 210;
     }
 
@@ -69,7 +69,7 @@ function bomb(bombPath) {
         bombSprite.scale.set(0.1);
         bombSprite.y = app.renderer.height / 2 + 150;
         bombSprite.anchor.set(0.5);
-        bombSprite.x = app.renderer.width / 2 + 2000;
+        bombSprite.x = app.renderer.width / 2 + Math.floor(Math.random() * 2000) + 1500;
         bombSprite.y = app.renderer.height / 2 + 115;
         }
   
@@ -230,7 +230,7 @@ function scorePanel() {
             gameOverText.y = app.renderer.height / 2 - 50;
             app.stage.addChild(gameOverText);
 
-            
+
 
 
            
