@@ -1,22 +1,29 @@
-const app = new PIXI.Application({
+ const app = new PIXI.Application({
     transparent: true,
     resizeTo: window,
 });
 document.body.appendChild(app.view);
 
+//image paths
 var bgPath = "images/bg_scene.jpg";
 var marioPath = "images/mario.png";
 var bombPath = "images/bomb.png";
 var coinPath = "images/coin.png";
 
+//visual components
 let bgSprite;
 let marioSprite;
 let marioSpeed = 5;
-let jumpForce = 10; 
+let jumpForce = 15; 
 let gravity = 0.5; 
 let bombSpeed=5;
 let jumping = false; 
 let keys = {}; 
+
+//logical components
+let score = 0;
+let life = 2;
+
 
 function bg(bgPath) {
     bgSprite = PIXI.Sprite.from(bgPath);
@@ -27,29 +34,59 @@ function bg(bgPath) {
 
 function coin(coinPath) {
     coinSprite = PIXI.Sprite.from(coinPath);
+    if(app.renderer.width >= 1920){
+
     coinSprite.scale.set(0.5);
     coinSprite.anchor.set(0.5);
-    coinSprite.x = app.renderer.width / 2 + 100;
-    coinSprite.y = app.renderer.height / 2 - 100;
+    coinSprite.x = app.renderer.width / 2 + Math.floor(Math.random() * 2000) + 1500 ;
+    coinSprite.y = app.renderer.height / 2 - 210;
+    }
+    else{
+    coinSprite.scale.set(0.3);
+    coinSprite.anchor.set(0.5);
+    coinSprite.x = app.renderer.width / 2 + 2000;
+    coinSprite.y = app.renderer.height / 2 - 210;
+    }
+
     app.stage.addChild(coinSprite);
 }
 
 function bomb(bombPath) {
     bombSprite = PIXI.Sprite.from(bombPath);
-    bombSprite.scale.set(0.2);
-    bombSprite.anchor.set(0.5);
-    bombSprite.x = app.renderer.width / 2 + 2000;
-    bombSprite.y = app.renderer.height / 2 + 150;
+    if(app.renderer.width >= 1920){
+        bombSprite.scale.set(0.2);
+        bombSprite.anchor.set(0.5);
+        bombSprite.x = app.renderer.width / 2 + Math.floor(Math.random() * 2000) + 1500;
+        bombSprite.y = app.renderer.height / 2 + 150;
+        }
+        else{
+        bombSprite.scale.set(0.1);
+        bombSprite.y = app.renderer.height / 2 + 150;
+        bombSprite.anchor.set(0.5);
+        bombSprite.x = app.renderer.width / 2 + 2000;
+        bombSprite.y = app.renderer.height / 2 + 115;
+        }
+  
     app.stage.addChild(bombSprite);
 }
 
 function mario(marioPath) {
     marioSprite = PIXI.Sprite.from(marioPath);
+    if(app.renderer.width >= 1920){
     marioSprite.scale.set(0.5);
     marioSprite.anchor.set(0.5);
     marioSprite.x = app.renderer.width / 2 - 200;
-    marioSprite.y = app.renderer.height / 2 + 100;
+    marioSprite.y = app.renderer.height / 2 + 80;
     app.stage.addChild(marioSprite);
+    }
+    else{
+    marioSprite.scale.set(0.3);
+    marioSprite.anchor.set(0.5);
+    marioSprite.x = app.renderer.width / 2 - 200;
+    marioSprite.y = app.renderer.height / 2 + 80;
+    app.stage.addChild(marioSprite);
+    }
+   
 
     // Event listeners for keydown and keyup
     document.addEventListener("keydown", onKeyDown);
@@ -89,10 +126,10 @@ function update() {
     if (jumping) {
         marioSprite.y -= jumpForce;
         jumpForce -= gravity;
-        if (marioSprite.y >= app.renderer.height / 2 + 100) {
-            marioSprite.y = app.renderer.height / 2 + 100;
+        if (marioSprite.y >= app.renderer.height / 2 + 80) {
+            marioSprite.y = app.renderer.height / 2 + 80;
             jumping = false;
-            jumpForce = 10;
+            jumpForce = 15;
         }
     }
 }
@@ -103,65 +140,155 @@ app.ticker.add(() => {
 });
 
 
-const bombSprites = [];
-const totalBombs = 3;
-
-function createBomb() {
-  const texture = PIXI.Texture.from("images/bomb.png");
-  const bombSprite = new PIXI.Sprite(texture);
-  bombSprite.scale.set(0.2);
-  app.stage.addChild(bombSprite);  
-
-  // Set initial position of bomb
-  bombSprite.x = app.renderer.width / 2 + 2000;
-  bombSprite.y = app.renderer.height/2 + 110 ; // Start from above the screen
-
-  // Add bombSprite to the array
-  bombSprites.push(bombSprite);
-
-  //delay between the bombs
-  bombSprite.delay = Math.random() * 2000;
-  bombSprite.elapsedTime = 0;
-}
-
-// Create bombs
-for (let i = 0; i < totalBombs; i++) {
-  createBomb();
-}
-
-app.ticker.add((delta) => {
-
-    bombSprites.forEach((bombSprite) => {
-        bombSprite.elapsedTime += delta;
-
-        if (bombSprite.elapsedTime >= bombSprite.delay) {
-            bombSprite.x -= (bombSpeed * delta) / 1; 
-            
-            // Border logic
-            if (bombSprite.x < -100) {
-                setTimeout(() => {
-                    bombSprite.x = app.renderer.width+100;
-                }
-                ,Math.random() * 1000); 
-               
-            }
-        }
-    });
-
-});
-
-
-
-//add ticker to move bomb
-function bombMove(bombSpeed) {
-   app.ticker.add(() => {
+//bomb movement to -x direction
+app.ticker.add(() => {
     bombSprite.x -= bombSpeed;
-    if (bombSprite.x < -100) {
+    if (bombSprite.x+500 < 0) {
         bombSprite.x = app.renderer.width;
     }
 });
+
+//coin movement to -x direction
+app.ticker.add(() => {
+    coinSprite.x -= bombSpeed;
+    if (coinSprite.x+500 < 0) {
+        coinSprite.x = app.renderer.width;
+    }
+});
+
+
+// score panel
+function scorePanel() {
+    const scorePanel = new PIXI.Graphics();
+    scorePanel.beginFill(0x000000);
+    scorePanel.drawRoundedRect(20, 20, 250, 100, 16);
+    scorePanel.alpha = 0.3;
+    scorePanel.lineStyle(4, 0x000000, 1);
+    //border radius
+   
+    scorePanel.endFill();
+    app.stage.addChild(scorePanel);
+
+   //score text
+    const scoreText = new PIXI.Text("Score: 0", { fill: "white",
+    fontFamily: "\"Lucida Console\", Monaco, monospace",
+    fontSize: 24});
+    scoreText.x = 70;
+    scoreText.y = 30;
+    app.stage.addChild(scoreText);
+
+    const lifeText = new PIXI.Text("Life:❤️❤️❤️", { fill: "white",
+    fontFamily: "\"Lucida Console\", Monaco, monospace",
+    fontSize: 24});
+    lifeText.x = 70;
+    lifeText.y = 70;
+
+    app.stage.addChild(lifeText);
+
+    //life counter
+    const lifeCounter = () => {
+        if(life==3)
+        {
+            life--;
+        }
+        else if(life==2)
+        {
+            lifeText.text = "Life:❤️❤️";
+            life--;
+        }
+        else if(life==1)
+        {
+            lifeText.text = "Life:❤️";
+            life--;
+        }
+        else if(life==0)
+        {
+            lifeText.text = "Life:💀";
+            //control disable
+            document.removeEventListener("keydown", onKeyDown);
+            document.removeEventListener("keyup", onKeyUp);
+            
+           
+        }
+    };
+
+
+    //update score
+    const updateScore = () => {
+        score += 10;
+        scoreText.text = "Score: " + score;
+    };
+
+    return {updateScore, lifeCounter}; 
 }
-bombMove(bombSpeed);
+
+const {updateScore, lifeCounter} = scorePanel();
+
+//collision detection toggler for coin
+let coinCollisionDetected = false;
+
+const coinCollisionHandler = () => {
+    if (marioSprite.x + marioSprite.width / 2 > coinSprite.x - coinSprite.width / 2 &&
+        marioSprite.x - marioSprite.width / 2 < coinSprite.x + coinSprite.width / 2 &&
+        marioSprite.y + marioSprite.height / 2 > coinSprite.y - coinSprite.height / 2 &&
+        marioSprite.y - marioSprite.height / 2 < coinSprite.y + coinSprite.height / 2) {
+
+        if (!coinCollisionDetected) {
+            console.log("coin collision detected");
+            coinCollisionDetected = true;
+            updateScore(); 
+        }
+    } else {
+        coinCollisionDetected = false;
+    }
+};
+
+app.ticker.add(coinCollisionHandler);
+
+
+//collision detection toggler for bomb
+let collisionDetected = false;
+
+const collisionHandler = () => {
+    if (marioSprite.x + marioSprite.width / 2 > bombSprite.x - bombSprite.width / 2 &&
+        marioSprite.x - marioSprite.width / 2 < bombSprite.x + bombSprite.width / 2 &&
+        marioSprite.y + marioSprite.height / 2 > bombSprite.y - bombSprite.height / 2 &&
+        marioSprite.y - marioSprite.height / 2 < bombSprite.y + bombSprite.height / 2) {
+
+        if (!collisionDetected) {
+            console.log("collision detected");
+            collisionDetected = true;
+            lifeCounter();
+        }
+    } else {
+        collisionDetected = false;
+    }
+};
+
+app.ticker.add(collisionHandler);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
