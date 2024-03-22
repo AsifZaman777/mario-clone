@@ -139,6 +139,15 @@ function update() {
             jumpForce = 15;
         }
     }
+
+    //mario border control
+    if (marioSprite.x < 0) {
+        marioSprite.x = 0;
+    }
+    if (marioSprite.x > app.renderer.width) {
+        marioSprite.x = app.renderer.width;
+    }
+
 }
 
 // Game loop using PIXI ticker
@@ -230,7 +239,10 @@ function scorePanel() {
             gameOverText.y = app.renderer.height / 2 - 50;
             app.stage.addChild(gameOverText);
 
-
+            //remove all tickers
+            app.ticker.remove(coinCollisionHandler);
+            app.ticker.remove(collisionHandler);
+            
 
 
            
