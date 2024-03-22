@@ -1,4 +1,10 @@
- const app = new PIXI.Application({
+const jumpSound = new Audio("sounds/jump.wav");
+const coinSound = new Audio("sounds/coin.wav");
+const bombSound = new Audio("sounds/bomb.wav");
+const gameOverSound = new Audio("sounds/gameover.wav");
+const fun = new Audio("sounds/kudasai.mp3");
+
+const app = new PIXI.Application({
     transparent: true,
     resizeTo: window,
 });
@@ -103,6 +109,7 @@ function onKeyDown(event) {
     if (event.key === " ") {
         if (!jumping) {
             jumping = true;
+            jumpSound.play();
         }
     }
     keys[event.key] = true;
@@ -207,7 +214,25 @@ function scorePanel() {
             //control disable
             document.removeEventListener("keydown", onKeyDown);
             document.removeEventListener("keyup", onKeyUp);
+
+            //disable all sounds
+            fun.pause();
+            jumpSound.pause();
+            coinSound.pause();
+            bombSound.pause();
+            gameOverSound.play();
+
+            //game over text
+            const gameOverText = new PIXI.Text("Game Over", { fill: "white",
+            fontFamily: "\"Lucida Console\", Monaco, monospace",
+            fontSize: 48});
+            gameOverText.x = app.renderer.width / 2 - 100;
+            gameOverText.y = app.renderer.height / 2 - 50;
+            app.stage.addChild(gameOverText);
+
             
+
+
            
         }
     };
@@ -237,6 +262,8 @@ const coinCollisionHandler = () => {
             console.log("coin collision detected");
             coinCollisionDetected = true;
             updateScore(); 
+            coinSound.play();
+            coinSprite.x = app.renderer.width / 2 + Math.floor(Math.random() * 2000) + 1500 ;
         }
     } else {
         coinCollisionDetected = false;
@@ -259,6 +286,8 @@ const collisionHandler = () => {
             console.log("collision detected");
             collisionDetected = true;
             lifeCounter();
+            bombSound.play(); 
+            bombSprite.x = app.renderer.width / 2 + Math.floor(Math.random() * 2000) + 1500 ;
         }
     } else {
         collisionDetected = false;
